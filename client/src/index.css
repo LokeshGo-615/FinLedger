@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #F5F8F2;
+  --surface: #FFFFFF;
+  --primary: #284D2C;
+  --accent: #9EF494;
+  --foreground: #17291B;
+  --muted: #68776B;
+  --border: #DCE5D8;
+  --primary-foreground: #FFFFFF;
+}
+
+.dark {
+  --background: #0B140C;
+  --surface: #17291B;
+  --primary: #9EF494;
+  --accent: #D9F4D2;
+  --foreground: #F5F8F2;
+  --muted: #9CAD9E;
+  --border: #2B4030;
+  --primary-foreground: #0B140C;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --font-sans: "Inter", sans-serif;
+  --font-heading: "Manrope", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+::selection {
+  background: #9EF494;
+  color: #0B140C;
+}
