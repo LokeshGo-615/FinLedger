@@ -57,3 +57,41 @@ body {
   background: #9EF494;
   color: #0B140C;
 }
+
+.hero-panels {
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(40, 77, 44, 0.06) 0px,
+    rgba(40, 77, 44, 0.015) 63px,
+    rgba(40, 77, 44, 0.12) 64px
+  );
+}
+
+.dark .hero-panels {
+  background-image: repeating-linear-gradient(
+    90deg,
+    #101c12 0px,
+    #192b1a 24px,
+    #293e25 60px,
+    #172719 64px,
+    #101c12 72px
+  );
+}
+
+
+.hero-glow {
+  background: radial-gradient(
+    ellipse at 50% 95%,
+    rgba(134, 210, 106, 0.32) 0%,
+    transparent 65%
+  );
+}
+
+.dark .hero-glow {
+  background: radial-gradient(
+    ellipse at 50% 90%,
+    rgba(134, 230, 100, 0.42) 0%,
+    rgba(65, 125, 45, 0.18) 35%,
+    transparent 72%
+  );
+}
