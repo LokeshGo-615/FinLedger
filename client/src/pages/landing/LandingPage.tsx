@@ -4,6 +4,7 @@ import { HeroBackground } from "../../components/landing/HeroBackground";
 import { HeroVisual } from "../../components/landing/HeroVisual";
 import { FeaturesSection } from "../../components/landing/FeaturesSection";
 import { SecuritySection } from "../../components/landing/SecuritySection";
+import { HowItWorksSection } from "../../components/landing/HowItWorksSection";
 
 export function LandingPage() {
   return (
@@ -28,6 +29,7 @@ export function LandingPage() {
       {/* Security section */}
 
       <SecuritySection />
+          <HowItWorksSection />
 
     </main>
   );
