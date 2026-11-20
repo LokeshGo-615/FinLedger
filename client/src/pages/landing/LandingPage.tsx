@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import { Navbar } from "../../components/landing/Navbar";
 import { Hero } from "../../components/landing/Hero";
 import { HeroBackground } from "../../components/landing/HeroBackground";
@@ -10,40 +12,33 @@ import { CTASection } from "../../components/landing/CTASection";
 import { Footer } from "../../components/landing/Footer";
 
 export function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div
       id="home"
       className="min-h-screen bg-background text-foreground"
     >
-
       <main>
-
         <div className="relative isolate overflow-hidden">
-
           <HeroBackground />
-
           <Navbar />
-
           <Hero />
-
           <HeroVisual />
-
         </div>
 
         <FeaturesSection />
-
         <SecuritySection />
-
         <HowItWorksSection />
-
         <AboutSection />
 
-        <CTASection />
-
+        <CTASection
+          onRegister={() => navigate("/register")}
+          onLogin={() => navigate("/login")}
+        />
       </main>
 
       <Footer />
-
     </div>
   );
 }
