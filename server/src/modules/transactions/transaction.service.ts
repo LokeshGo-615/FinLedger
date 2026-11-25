@@ -10,15 +10,16 @@ import {
   rupeesToPaise,
 } from "../../utils/money.js";
 import { ApiError } from "../../utils/ApiError.js";
-
 import type {
   DepositInput,
+  WithdrawalInput,
 } from "./transaction.validation.js";
 
 function buildRequestHash(
   userId: string,
   accountId: string,
-  amount: number
+  amount: number,
+  type: "DEPOSIT" | "WITHDRAWAL" = "DEPOSIT"
 ): string {
   return createHash("sha256")
     .update(
@@ -26,7 +27,7 @@ function buildRequestHash(
         userId,
         accountId,
         amount,
-        type: "DEPOSIT",
+        type,
       })
     )
     .digest("hex");
@@ -188,6 +189,176 @@ export async function depositMoney(
       }
 
       return committed;
+    }
+
+    throw error;
+  }
+}
+
+
+
+export async function withdrawMoney(
+  userId: string,
+  input: WithdrawalInput,
+  idempotencyKey: string
+) {
+  const amount = rupeesToPaise(input.amount);
+
+  if (amount <= 0 || amount > MAX_BALANCE) {
+    throw new ApiError(400, "Invalid withdrawal amount");
+  }
+
+  const ownerId = new Types.ObjectId(userId);
+  const accountId = new Types.ObjectId(input.accountId);
+
+  const requestHash = buildRequestHash(
+    userId,
+    accountId.toString(),
+    amount,
+    "WITHDRAWAL"
+  );
+
+  // Check previously completed request.
+  const existing = await Transaction.findOne({
+    userId: ownerId,
+    idempotencyKey,
+  });
+
+  if (existing) {
+    if (existing.requestHash !== requestHash) {
+      throw new ApiError(
+        409,
+        "Idempotency key already used for another request"
+      );
+    }
+
+    return existing;
+  }
+
+  try {
+    return await mongoose.connection.transaction(
+      async (session) => {
+
+        // Recheck idempotency inside transaction.
+        const duplicate = await Transaction.findOne({
+          userId: ownerId,
+          idempotencyKey,
+        }).session(session);
+
+        if (duplicate) {
+          if (duplicate.requestHash !== requestHash) {
+            throw new ApiError(
+              409,
+              "Idempotency key already used for another request"
+            );
+          }
+
+          return duplicate;
+        }
+
+        // Check ownership and atomically deduct funds.
+        const account = await Account.findOneAndUpdate(
+          {
+            _id: accountId,
+            userId: ownerId,
+            status: "ACTIVE",
+            balance: {
+              $gte: amount,
+              $lte: MAX_BALANCE,
+            },
+          },
+          {
+            $inc: {
+              balance: -amount,
+            },
+          },
+          {
+            session,
+            returnDocument: "after",
+          }
+        );
+
+        if (!account) {
+          throw new ApiError(
+            409,
+            "Account unavailable or insufficient balance"
+          );
+        }
+
+        // Create withdrawal transaction.
+        const [transaction] = await Transaction.create(
+          [
+            {
+              userId: ownerId,
+              type: "WITHDRAWAL",
+              sourceAccountId: accountId,
+              destinationAccountId: null,
+              amount,
+              currency: "INR",
+              idempotencyKey,
+              requestHash,
+              status: "COMPLETED",
+            },
+          ],
+          { session }
+        );
+
+        if (!transaction) {
+          throw new Error(
+            "Withdrawal transaction creation failed"
+          );
+        }
+
+        // Create double-entry ledger records.
+        await LedgerEntry.create(
+          [
+            {
+              transactionId: transaction._id,
+              accountKind: "CUSTOMER",
+              accountId,
+              direction: "DEBIT",
+              amount,
+              currency: "INR",
+            },
+            {
+              transactionId: transaction._id,
+              accountKind: "SYSTEM",
+              accountId: SYSTEM_FUNDING_ACCOUNT_ID,
+              direction: "CREDIT",
+              amount,
+              currency: "INR",
+            },
+          ],
+          {
+            session,
+            ordered: true,
+          }
+        );
+
+        return transaction;
+      }
+    );
+  } catch (error) {
+
+    // Handle concurrent idempotent requests.
+    const committed = await Transaction.findOne({
+      userId: ownerId,
+      idempotencyKey,
+    });
+
+    if (committed) {
+      if (committed.requestHash !== requestHash) {
+        throw new ApiError(
+          409,
+          "Idempotency key already used for another request"
+        );
+      }
+
+      return committed;
+    }
+
+    if (process.env.NODE_ENV === "test") {
+      console.error("WITHDRAWAL SERVICE ERROR:", error);
     }
 
     throw error;
