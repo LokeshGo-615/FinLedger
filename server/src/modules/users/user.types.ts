@@ -15,6 +15,10 @@ export interface IUser {
   password: string;
   role: UserRole;
   status: UserStatus;
+
+  // Number of open accounts (ACTIVE + FROZEN)
+  activeAccountCount: number;
+
   createdAt: Date;
   updatedAt: Date;
 }

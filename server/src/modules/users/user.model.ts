@@ -1,3 +1,4 @@
+
 import mongoose, { Schema } from "mongoose";
 
 import {
@@ -41,6 +42,18 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: Object.values(UserStatus),
       default: UserStatus.ACTIVE
+    },
+
+    activeAccountCount: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+      max: 5,
+      validate: {
+        validator: Number.isInteger,
+        message: "Account count must be an integer"
+      }
     }
   },
   {

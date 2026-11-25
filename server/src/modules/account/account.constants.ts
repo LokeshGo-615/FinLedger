@@ -1,0 +1,7 @@
+export const MAX_ACCOUNTS_PER_USER = 5;
+
+export const MAX_ACCOUNT_NUMBER_RETRIES = 5;
+
+export const DEFAULT_ACCOUNT_CURRENCY = "INR";
+
+export const DEFAULT_ACCOUNT_STATUS = "ACTIVE";

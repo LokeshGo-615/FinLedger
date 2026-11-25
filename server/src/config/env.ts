@@ -2,7 +2,9 @@ import dotenv from "dotenv";
 import { z } from "zod";
 import process from "node:process";
 
-dotenv.config();
+dotenv.config({
+  path: process.env.NODE_ENV === "test" ? ".env.test" : ".env",
+});
 
 const envSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65535).default(5000),
