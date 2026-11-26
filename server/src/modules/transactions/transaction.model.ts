@@ -97,11 +97,13 @@ transactionSchema.index(
 transactionSchema.index({
   sourceAccountId: 1,
   createdAt: -1,
+  _id: -1,
 });
 
 transactionSchema.index({
   destinationAccountId: 1,
   createdAt: -1,
+  _id: -1,
 });
 
 export const Transaction =
