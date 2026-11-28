@@ -4,6 +4,10 @@ import { Router } from "express";
 import { authenticate } from "../../middleware/auth.middleware.js";
 
 import {
+  transactionRateLimiter,
+} from "../../middleware/distributedRateLimit.js";
+
+import {
   depositController,
   withdrawalController,
   transferController,
@@ -15,13 +19,28 @@ const router = Router();
 
 router.use(authenticate);
 
-// Transaction operations
-router.post("/deposit", depositController);
-router.post("/withdraw", withdrawalController);
-router.post("/transfer", transferController);
+router.post(
+  "/deposit",
+  transactionRateLimiter,
+  depositController
+);
 
-// Transaction history
-router.get("/", getTransactionHistoryController);
+router.post(
+  "/withdraw",
+  transactionRateLimiter,
+  withdrawalController
+);
+
+router.post(
+  "/transfer",
+  transactionRateLimiter,
+  transferController
+);
+
+router.get(
+  "/",
+  getTransactionHistoryController
+);
 
 router.get(
   "/:transactionId",

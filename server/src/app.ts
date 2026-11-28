@@ -14,6 +14,8 @@ import { ApiError } from "./utils/ApiError.js";
 import { errorHandler } from "./middleware/error.middleware.js";
 import transactionRoutes from "./modules/transactions/transaction.routes.js"
 
+import { globalRateLimiter } from "./middleware/distributedRateLimit.js";
+
 const app = express();
 
 // 1. Security headers
@@ -49,6 +51,7 @@ app.get("/api/v1/health", (_req, res) => {
 // 6. API routes
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/accounts", accountRoutes);
+app.use("/api/v1", globalRateLimiter);
 
 app.use(
   "/api/v1/transactions",

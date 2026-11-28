@@ -7,6 +7,7 @@ import {
   freezeBankAccount,
   unfreezeBankAccount,
   closeBankAccount,
+  getAccountMetadataController,
 } from "./account.controller.js";
 
 import {
@@ -53,6 +54,11 @@ router.patch(
   "/:accountId/unfreeze",
   authorize("ADMIN"),
   unfreezeBankAccount
+);
+
+router.get(
+  "/:accountId/metadata",
+  getAccountMetadataController
 );
 
 export default router;

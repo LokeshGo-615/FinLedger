@@ -22,6 +22,13 @@ const envSchema = z.object({
   JWT_ACCESS_SECRET: z.string().min(32),
 
   JWT_REFRESH_SECRET: z.string().min(32),
+
+  REDIS_ENABLED: z
+  .enum(["true", "false"])
+  .default("false")
+  .transform((value) => value === "true"),
+
+REDIS_URL: z.string().url().optional(),
 });
 
 const result = envSchema.safeParse(process.env);
@@ -35,4 +42,6 @@ if (!result.success) {
   process.exit(1);
 }
 
+
 export const env = result.data;
+

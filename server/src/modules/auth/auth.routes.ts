@@ -25,6 +25,10 @@ import {
   UserRole
 } from "../users/user.types.js";
 
+import {
+  authRateLimiter,
+} from "../../middleware/distributedRateLimit.js";
+
 const router = Router();
 
 router.post("/register", authLimiter, register);

@@ -1,6 +1,8 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
+import{ getAccountMetadata } from "./account.cache.js";
+import type  { Request , Response } from "express";
 
 import {
   createAccount,
@@ -189,3 +191,36 @@ export const closeBankAccount = asyncHandler(
     );
   }
 );
+
+
+export const getAccountMetadataController =
+  asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      throw new ApiError(401, "Authentication required");
+    }
+
+    const parsed = accountIdSchema.safeParse(
+      req.params.accountId
+    );
+
+    if (!parsed.success) {
+      throw new ApiError(400, "Invalid account ID");
+    }
+
+    const metadata = await getAccountMetadata(
+      req.user.id,
+      parsed.data
+    );
+
+    if (!metadata) {
+      throw new ApiError(404, "Account not found");
+    }
+
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        metadata,
+        "Account metadata fetched successfully"
+      )
+    );
+  });
